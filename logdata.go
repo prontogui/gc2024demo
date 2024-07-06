@@ -1,8 +1,6 @@
 package main
 
 import (
-	"log/slog"
-	"slices"
 	"strings"
 	"time"
 )
@@ -14,24 +12,34 @@ type LogItem struct {
 }
 
 const (
-	RecentMinute = iota
-	RecentHour
-	RecentDay
-	AllTime
-
-	LevelDebug   = int(slog.LevelDebug)
-	LevelInfo    = int(slog.LevelInfo)
-	LevelWarning = int(slog.LevelWarn)
-	LevelError   = int(slog.LevelError)
-	LevelPanic   = int(slog.LevelError + 1)
+	RecentMinute = "Last Minute"
+	RecentHour   = "Last Hour"
+	RecentDay    = "Last Day"
+	AllTime      = "All"
 )
 
-func QueryLogItems(timeInterval int, messageContains string, severities []int) []LogItem {
+const (
+	// The severity levels to filter by.  These also server as array indices [0, n-1]
+	LevelDebug = iota
+	LevelInfo
+	LevelWarning
+	LevelError
+	LevelPanic
+	LevelAllocation
+)
 
-	all := allLogData()
+var logData []LogItem
 
+func init() {
+	logData = initialLogData()
+}
+
+func QueryLogItems(timeInterval string, severities [LevelAllocation]bool, messageContains string) []LogItem {
+
+	// The filter criteria expressed in time.Time
 	var afterTime time.Time
 
+	// Determine the (inclusive) time frame to filter by
 	switch timeInterval {
 	case RecentMinute:
 		afterTime = time.Now().Add(-time.Minute).Add(-time.Nanosecond)
@@ -40,27 +48,40 @@ func QueryLogItems(timeInterval int, messageContains string, severities []int) [
 	case RecentDay:
 		afterTime = time.Now().AddDate(0, 0, -1).Add(-time.Nanosecond)
 	case AllTime:
+		afterTime = time.Date(1970, 1, 1, 0, 0, 0, 0, time.Local)
 	default:
-		afterTime = time.Date(0, 0, 0, 0, 0, 0, 0, nil)
+		afterTime = time.Now().Add(time.Nanosecond)
 	}
 
+	// The results that are built from filtering
 	results := []LogItem{}
 
-	for _, item := range all {
-		if item.Time.After(afterTime) {
-			if slices.Contains(severities, item.Severity) {
-				if len(messageContains) == 0 || strings.Contains(item.Message, messageContains) {
-					results = append(results, item)
-				}
-			}
+	// Go through all the log items while filtering the right ones
+	for _, item := range logData {
 
+		// Inside the time interval?
+		if !item.Time.After(afterTime) {
+			continue
 		}
+
+		// One of the filtered severities?
+		if !severities[item.Severity] {
+			continue
+		}
+
+		// Message contains text?
+		if !strings.Contains(item.Message, messageContains) {
+			continue
+		}
+
+		// All filter criteria were met - include this item
+		results = append(results, item)
 	}
 
 	return results
 }
 
-func allLogData() []LogItem {
+func initialLogData() []LogItem {
 	// Base all log times from 7 days ago
 	baseTime := time.Now().AddDate(0, 0, -5)
 

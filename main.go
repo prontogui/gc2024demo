@@ -9,6 +9,7 @@ import (
 
 func main() {
 
+	// Initialize ProntoGUI
 	pgui := pg.NewProntoGUI()
 	err := pgui.StartServing("127.0.0.1", 50053)
 
@@ -17,19 +18,42 @@ func main() {
 		return
 	}
 
-	logItems := QueryLogItems(AllTime, "", []int{LevelDebug, LevelInfo, LevelWarning, LevelError, LevelPanic})
+	// Initial filter settings (show everything)
+	timeInterval := AllTime
+	severities := [LevelAllocation]bool{true, true, true, true, true}
+	messageContains := ""
 
-	// Convert messages into PG model
-	rows := [][]pg.Primitive{}
+	// Build our GUI
 
-	for _, item := range logItems {
-		rows = append(rows, []pg.Primitive{
-			timePrimitive(item.Time),
-			severityPrimitive(item.Severity),
-			messagePrimitive(item.Message),
-		})
-	}
+	// Big and bold heading for our GUI
+	guiHeading := pg.TextWith{Content: "Simple Log Viewer"}.Make()
 
+	// Time interval choice
+	timeHeading := pg.TextWith{Content: "Time Interval"}.Make()
+	timeChoice := pg.ChoiceWith{Choice: AllTime, Choices: []string{RecentMinute, RecentHour, RecentDay, AllTime}}.Make()
+	timeGroup := pg.GroupWith{
+		GroupItems: []pg.Primitive{timeHeading, timeChoice},
+	}.Make()
+
+	// Severities check boxes
+	severitiesHeading := pg.TextWith{Content: "Severities"}.Make()
+	debugCheck := pg.CheckWith{Label: "Debug", Checked: severities[LevelDebug]}.Make()
+	infoCheck := pg.CheckWith{Label: "Info", Checked: severities[LevelInfo]}.Make()
+	warningCheck := pg.CheckWith{Label: "Warning", Checked: severities[LevelWarning]}.Make()
+	errorCheck := pg.CheckWith{Label: "Error", Checked: severities[LevelError]}.Make()
+	panicCheck := pg.CheckWith{Label: "Panic", Checked: severities[LevelPanic]}.Make()
+	severitiesGroup := pg.GroupWith{
+		GroupItems: []pg.Primitive{severitiesHeading, debugCheck, infoCheck, warningCheck, errorCheck, panicCheck},
+	}.Make()
+
+	// Message text filter
+	messageHeading := pg.TextWith{Content: "Message Contains"}.Make()
+	messageTextField := pg.TextFieldWith{}.Make()
+	messageGroup := pg.GroupWith{
+		GroupItems: []pg.Primitive{messageHeading, messageTextField},
+	}.Make()
+
+	// A table to show log items
 	table := pg.TableWith{
 		TemplateRow: []pg.Primitive{
 			&pg.Text{}, &pg.Text{}, &pg.Text{},
@@ -37,17 +61,43 @@ func main() {
 		Headings: []string{
 			"Time", "Severity", "Message",
 		},
-		Rows: rows,
 	}.Make()
 
-	pgui.SetGUI(table)
+	pgui.SetGUI(guiHeading, timeGroup, severitiesGroup, messageGroup, table)
 
 	for {
+		// Query for the log items as of this moment
+		logItems := QueryLogItems(timeInterval, severities, messageContains)
+
+		// Convert messages into a table row of ProntoGUI primitives
+		rows := [][]pg.Primitive{}
+
+		for _, item := range logItems {
+			rows = append(rows, []pg.Primitive{
+				timePrimitive(item.Time),
+				severityPrimitive(item.Severity),
+				messagePrimitive(item.Message),
+			})
+		}
+
+		// Update the table contents
+		table.SetRows(rows)
+
+		// Wait for something to happen in the GUI
 		_, err := pgui.Wait()
 		if err != nil {
 			fmt.Printf("error from Wait() is:  %s\n", err.Error())
 			break
 		}
+
+		//
+		timeInterval = timeChoice.Choice()
+		severities[LevelDebug] = debugCheck.Checked()
+		severities[LevelInfo] = infoCheck.Checked()
+		severities[LevelWarning] = warningCheck.Checked()
+		severities[LevelError] = errorCheck.Checked()
+		severities[LevelPanic] = panicCheck.Checked()
+		messageContains = messageTextField.TextEntry()
 	}
 }
 
