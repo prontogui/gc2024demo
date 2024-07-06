@@ -34,7 +34,7 @@ func init() {
 	logData = initialLogData()
 }
 
-func QueryLogItems(timeInterval string, severities [LevelAllocation]bool, messageContains string) []LogItem {
+func QueryLogItems(timeInterval string, debugYes bool, infoYes bool, warningYes bool, errorYes bool, panicYes bool, messageContains string) []LogItem {
 
 	// The filter criteria expressed in time.Time
 	var afterTime time.Time
@@ -65,7 +65,19 @@ func QueryLogItems(timeInterval string, severities [LevelAllocation]bool, messag
 		}
 
 		// One of the filtered severities?
-		if !severities[item.Severity] {
+		if item.Severity == LevelDebug && !debugYes {
+			continue
+		}
+		if item.Severity == LevelInfo && !infoYes {
+			continue
+		}
+		if item.Severity == LevelWarning && !warningYes {
+			continue
+		}
+		if item.Severity == LevelError && !errorYes {
+			continue
+		}
+		if item.Severity == LevelPanic && !panicYes {
 			continue
 		}
 
