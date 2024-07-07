@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"time"
 
+	// Import the Go library for ProntoGUI
 	pg "github.com/prontogui/golib"
 )
 
@@ -18,7 +19,7 @@ func main() {
 		return
 	}
 
-	// Build our GUI
+	// <<== BEGIN - Building our GUI
 
 	// Big and bold heading for our GUI
 	guiHeading := pg.TextWith{Content: "Simple Log Viewer"}.Make()
@@ -65,9 +66,12 @@ func main() {
 
 	pgui.SetGUI(guiHeading, timeGroup, severitiesGroup, messageGroup, table)
 
+	// <<== END - Building our GUI
+
+	// Loop while handling the events occuring in the GUI
 	for {
 		// Query for the log items as of this moment
-		logItems := QueryLogItems(
+		logItems := RetrieveFilteredLogItems(
 			timeChoice.Choice(),
 			debugCheck.Checked(),
 			infoCheck.Checked(),
@@ -100,11 +104,13 @@ func main() {
 	}
 }
 
+// Convert a time.Time into a pg.Text primitive for the GUI.
 func timePrimitive(t time.Time) pg.Primitive {
 	timeString := t.Format(time.RFC1123)
 	return pg.TextWith{Content: timeString}.Make()
 }
 
+// Convert a severity level into a pg.Text primitive for the GUI.
 func severityPrimitive(severity int) pg.Primitive {
 
 	var severityString string
@@ -127,6 +133,7 @@ func severityPrimitive(severity int) pg.Primitive {
 	return pg.TextWith{Content: severityString}.Make()
 }
 
+// Convert a message into a pg.Text primitive for the GUI.
 func messagePrimitive(message string) pg.Primitive {
 	return pg.TextWith{Content: message}.Make()
 }

@@ -5,12 +5,15 @@ import (
 	"time"
 )
 
+// An log item for demo purposes.  It is fairly typical as far as
+// structured logging goes.
 type LogItem struct {
 	Time     time.Time
 	Message  string
 	Severity int
 }
 
+// String constants for time intervals when calling retrieval function.
 const (
 	RecentMinute = "Last Minute"
 	RecentHour   = "Last Hour"
@@ -18,8 +21,8 @@ const (
 	AllTime      = "All"
 )
 
+// The severity levels to filter by.  These also server as array indices [0, n-1]
 const (
-	// The severity levels to filter by.  These also server as array indices [0, n-1]
 	LevelDebug = iota
 	LevelInfo
 	LevelWarning
@@ -28,13 +31,15 @@ const (
 	LevelAllocation
 )
 
+// The log data items.
 var logData []LogItem
 
+// Module initializer to load a set of log items for demo purposes.
 func init() {
 	logData = initialLogData()
 }
 
-func QueryLogItems(timeInterval string, debugYes bool, infoYes bool, warningYes bool, errorYes bool, panicYes bool, messageContains string) []LogItem {
+func RetrieveFilteredLogItems(timeInterval string, debugYes bool, infoYes bool, warningYes bool, errorYes bool, panicYes bool, messageContains string) []LogItem {
 
 	// The filter criteria expressed in time.Time
 	var afterTime time.Time
@@ -93,10 +98,12 @@ func QueryLogItems(timeInterval string, debugYes bool, infoYes bool, warningYes 
 	return results
 }
 
+// Builds an initial set of fabricated log items for demo purposes.
 func initialLogData() []LogItem {
 	// Base all log times from 7 days ago
 	baseTime := time.Now().AddDate(0, 0, -5)
 
+	// Function to simplify making time values
 	makeTime := func(relativeDay int, hour int, minute int) time.Time {
 
 		hoursAndMinutes := int64(minute)*int64(time.Minute) + int64(hour)*int64(time.Hour)
