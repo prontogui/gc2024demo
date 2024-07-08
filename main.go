@@ -22,10 +22,13 @@ func main() {
 	// <<== BEGIN - Building our GUI
 
 	// Big and bold heading for our GUI
-	guiHeading := pg.TextWith{Content: "Simple Log Viewer"}.Make()
+	guiHeading := pg.TextWith{
+		Content:    "Simple Log Viewer",
+		Embodiment: "{\"fontFamily\":\"Roboto\", \"fontSize\":\"20.0\"}",
+	}.Make()
 
 	// Time interval choice
-	timeHeading := pg.TextWith{Content: "Time Interval"}.Make()
+	timeHeading := pg.TextWith{Content: "Time Interval "}.Make()
 	timeChoice := pg.ChoiceWith{
 		Choice:  AllTime,
 		Choices: []string{RecentMinute, RecentHour, RecentDay, AllTime},
@@ -35,7 +38,7 @@ func main() {
 	}.Make()
 
 	// Severities check boxes
-	severitiesHeading := pg.TextWith{Content: "Severities"}.Make()
+	severitiesHeading := pg.TextWith{Content: "Severities "}.Make()
 	debugCheck := pg.CheckWith{Label: "Debug", Checked: true}.Make()
 	infoCheck := pg.CheckWith{Label: "Info", Checked: true}.Make()
 	warningCheck := pg.CheckWith{Label: "Warning", Checked: true}.Make()
@@ -48,7 +51,7 @@ func main() {
 	}.Make()
 
 	// Message text filter
-	messageHeading := pg.TextWith{Content: "Message Contains"}.Make()
+	messageHeading := pg.TextWith{Content: "Message Contains "}.Make()
 	messageTextField := pg.TextFieldWith{}.Make()
 	messageGroup := pg.GroupWith{
 		GroupItems: []pg.Primitive{messageHeading, messageTextField},
@@ -114,23 +117,33 @@ func timePrimitive(t time.Time) pg.Primitive {
 func severityPrimitive(severity int) pg.Primitive {
 
 	var severityString string
+	embodiment := ""
 
 	switch severity {
 	case LevelDebug:
 		severityString = "DEBUG"
+		// White text with brown background
+		embodiment = "{\"color\":\"argb:0xFFFAFAFA\", \"backgroundColor\":\"argb:0xFF4E342E\"}"
 	case LevelInfo:
 		severityString = "INFO"
+		embodiment = "{\"color\":\"argb:0xFF1A237E\"}"
 	case LevelWarning:
 		severityString = "WARNING"
+		// Black text on yellow background
+		embodiment = "{\"color\":\"argb:0xFF212121\", \"backgroundColor\":\"argb:0xFFFFEE58\"}"
 	case LevelError:
 		severityString = "ERROR"
+		// Red text
+		embodiment = "{\"color\":\"argb:0xFFF44336\"}"
 	case LevelPanic:
 		severityString = "PANIC"
+		// White text with red background
+		embodiment = "{\"color\":\"argb:0xFFFAFAFA\", \"backgroundColor\":\"argb:0xFFF44336\"}"
 	default:
 		severityString = "UNKNOWN"
 	}
 
-	return pg.TextWith{Content: severityString}.Make()
+	return pg.TextWith{Content: severityString, Embodiment: embodiment}.Make()
 }
 
 // Convert a message into a pg.Text primitive for the GUI.
