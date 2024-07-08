@@ -19,9 +19,9 @@ func main() {
 		return
 	}
 
-	// <<== BEGIN - Building our GUI
+	// <<== BEGIN - Building the GUI
 
-	// Big and bold heading for our GUI
+	// Big and bold heading for the GUI
 	guiHeading := pg.TextWith{
 		Content:    "Simple Log Viewer",
 		Embodiment: "{\"fontFamily\":\"Roboto\", \"fontSize\":\"20.0\"}",
@@ -69,7 +69,7 @@ func main() {
 
 	pgui.SetGUI(guiHeading, timeGroup, severitiesGroup, messageGroup, table)
 
-	// <<== END - Building our GUI
+	// <<== END - Building the GUI
 
 	// Loop while handling the events occuring in the GUI
 	for {
