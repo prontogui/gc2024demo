@@ -59,9 +59,6 @@ func main() {
 
 	// A table to show log items
 	table := pg.TableWith{
-		TemplateRow: []pg.Primitive{
-			&pg.Text{}, &pg.Text{}, &pg.Text{},
-		},
 		Headings: []string{
 			"Time", "Severity", "Message",
 		},
