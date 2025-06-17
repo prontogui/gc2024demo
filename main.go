@@ -23,15 +23,22 @@ func main() {
 
 	// Big and bold heading for the GUI
 	guiHeading := pg.TextWith{
-		Content:    "Simple Log Viewer",
-		Embodiment: "{\"fontFamily\":\"Roboto\", \"fontSize\":\"20.0\"}",
+		Content:    "Log Viewer Example",
+		Embodiment: "fontFamily: Roboto, fontSize: 20.0, fontWeight: bold, marginAll: 10",
+	}.Make()
+
+	// Mention from GC 24
+	gc24mention := pg.TextWith{
+		Content:    "(From GopherCon 2024 Lightning Talk)",
+		Embodiment: "fontSize: 18, fontStyle: italic, marginAll: 10",
 	}.Make()
 
 	// Time interval choice
-	timeHeading := pg.TextWith{Content: "Time Interval "}.Make()
+	timeHeading := pg.TextWith{Content: "Time Interval  "}.Make()
 	timeChoice := pg.ChoiceWith{
-		Choice:  AllTime,
-		Choices: []string{RecentMinute, RecentHour, RecentDay, AllTime},
+		Choice:     AllTime,
+		Choices:    []string{RecentMinute, RecentHour, RecentDay, AllTime},
+		Embodiment: "width: 200",
 	}.Make()
 	timeGroup := pg.GroupWith{
 		GroupItems: []pg.Primitive{timeHeading, timeChoice},
@@ -51,8 +58,10 @@ func main() {
 	}.Make()
 
 	// Message text filter
-	messageHeading := pg.TextWith{Content: "Message Contains "}.Make()
-	messageTextField := pg.TextFieldWith{}.Make()
+	messageHeading := pg.TextWith{Content: "Message Contains  "}.Make()
+	messageTextField := pg.TextFieldWith{
+		Embodiment: "width: 300, borderAll: 1",
+	}.Make()
 	messageGroup := pg.GroupWith{
 		GroupItems: []pg.Primitive{messageHeading, messageTextField},
 	}.Make()
@@ -64,7 +73,7 @@ func main() {
 		},
 	}.Make()
 
-	pgui.SetGUI(guiHeading, timeGroup, severitiesGroup, messageGroup, table)
+	pgui.SetGUI(guiHeading, gc24mention, timeGroup, severitiesGroup, messageGroup, table)
 
 	// <<== END - Building the GUI
 
@@ -120,22 +129,22 @@ func severityPrimitive(severity int) pg.Primitive {
 	case LevelDebug:
 		severityString = "DEBUG"
 		// White text with brown background
-		embodiment = "{\"color\":\"argb:0xFFFAFAFA\", \"backgroundColor\":\"argb:0xFF4E342E\"}"
+		embodiment = "{\"color\":\"#FFFAFAFA\", \"backgroundColor\":\"#FF4E342E\"}"
 	case LevelInfo:
 		severityString = "INFO"
-		embodiment = "{\"color\":\"argb:0xFF1A237E\"}"
+		embodiment = "{\"color\":\"#FF1A237E\"}"
 	case LevelWarning:
 		severityString = "WARNING"
 		// Black text on yellow background
-		embodiment = "{\"color\":\"argb:0xFF212121\", \"backgroundColor\":\"argb:0xFFFFEE58\"}"
+		embodiment = "{\"color\":\"#FF212121\", \"backgroundColor\":\"#FFFFEE58\"}"
 	case LevelError:
 		severityString = "ERROR"
 		// Red text
-		embodiment = "{\"color\":\"argb:0xFFF44336\"}"
+		embodiment = "{\"color\":\"#FFF44336\"}"
 	case LevelPanic:
 		severityString = "PANIC"
 		// White text with red background
-		embodiment = "{\"color\":\"argb:0xFFFAFAFA\", \"backgroundColor\":\"argb:0xFFF44336\"}"
+		embodiment = "{\"color\":\"#FFFAFAFA\", \"backgroundColor\":\"#FFF44336\"}"
 	default:
 		severityString = "UNKNOWN"
 	}
@@ -145,5 +154,8 @@ func severityPrimitive(severity int) pg.Primitive {
 
 // Convert a message into a pg.Text primitive for the GUI.
 func messagePrimitive(message string) pg.Primitive {
-	return pg.TextWith{Content: message}.Make()
+	return pg.TextWith{
+		Content:    message,
+		Embodiment: "horizontalTextAlignment: left",
+	}.Make()
 }
