@@ -68,8 +68,11 @@ func main() {
 
 	// A table to show log items
 	table := pg.TableWith{
-		Headings: []string{
-			"Time", "Severity", "Message",
+		Embodiment: "paged",
+		HeaderRow: []pg.Primitive{
+			pg.NewText("Time"),
+			pg.NewText("Severity"),
+			pg.NewText("Message"),
 		},
 	}.Make()
 
